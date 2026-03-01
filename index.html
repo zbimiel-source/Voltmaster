@@ -8,41 +8,32 @@
     <meta name="apple-mobile-web-app-title" content="VoltMaster">
     <meta name="theme-color" content="#0f172a">
     
-    <link rel="apple-touch-icon" href="https://ui-avatars.com/api/?name=⚡&background=8b5cf6&color=fff&size=512"> 
+    <link rel="apple-touch-icon" href="icon.png"> 
+    <link rel="apple-touch-icon" href="icon.jpg">
+    
     <title>VoltMaster - Ucz się, nie scrolluj</title>
     
     <style>
         :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #8b5cf6; --success: #22c55e; --error: #ef4444; --fire: #f97316; --xp: #3b82f6; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow-x: hidden; padding-top: env(safe-area-inset-top); }
-        
-        /* Top Bar: Streak & XP */
         header { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px 10px; }
         .stats-container { display: flex; gap: 10px; }
         .stat-badge { padding: 8px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: 800; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .streak-badge { background: rgba(249, 115, 22, 0.15); color: var(--fire); }
         .level-badge { background: rgba(59, 130, 246, 0.15); color: var(--xp); }
-        
-        /* XP Bar */
         .xp-bar-container { margin: 0 25px 20px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
         .xp-bar-fill { height: 100%; background: var(--xp); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
-
         #app-container { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 20px 20px; overflow-y: auto; }
-        
-        /* Daily Trivia */
-        .daily-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3); width: 100%; max-width: 400px; margin-bottom: 25px; position: relative; overflow: hidden; }
+        .daily-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3); width: 100%; max-width: 400px; margin-bottom: 25px; }
         .daily-badge { background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
         .daily-title { font-size: 1.4rem; font-weight: 800; margin: 0 0 10px 0; }
-        
-        /* Interactive Quiz Card */
         .card { background: var(--card); border-radius: 24px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); width: 100%; max-width: 400px; }
         .lesson-tag { color: var(--accent); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
         h2 { margin-top: 0; font-size: 1.3rem; margin-bottom: 15px; }
         p { line-height: 1.6; color: #cbd5e1; font-size: 1.05rem; }
-        
         .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; margin: 12px 0; cursor: pointer; transition: all 0.3s; font-weight: 600; font-size: 1.05rem; }
         .quiz-option.correct { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: var(--success); }
         .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--error); color: var(--error); transform: translateX(5px); }
-        
         .next-btn { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 1.1rem; font-weight: bold; margin-top: 15px; display: none; cursor: pointer; box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4); }
         .next-btn:active { transform: scale(0.98); }
     </style>
@@ -72,39 +63,38 @@
     </div>
 
     <script>
-        // --- BAZA DANYCH (Miesiąc dopaminy) ---
         const trivias = [
             { t: "Prędkość prądu", c: "Elektrony poruszają się w kablu z prędkością zaledwie ~1 mm na sekundę! To pole elektromagnetyczne przenosi energię z prędkością światła." },
-            { t: "Kto wymyślił AC?", c: "Nikola Tesla wygrał z Edisonem 'Wojnę Prądów', udowadniając, że prąd zmienny (AC) można przesyłać na setki kilometrów bez ogromnych strat." },
-            { t: "Prawo Moore'a", c: "Liczba tranzystorów w procesorach podwaja się średnio co 2 lata. Dzisiejszy iPhone ma miliardy tranzystorów!" },
-            { t: "Bateria w cytrynie", c: "Cytryna nie 'produkuje' prądu. Działa jedynie jako elektrolit, umożliwiając przepływ jonów między dwiema różnymi blaszkami metalu." },
-            { t: "Czyste złoto", c: "Złoto to świetny przewodnik, ale używa się go w elektronice rzadko (tylko na stykach) nie tylko z powodu ceny. Miedź i srebro przewodzą prąd LEPIEJ niż złoto! Złoto za to nie rdzewieje." },
-            { t: "Superprzewodnictwo", c: "Gdy schłodzisz niektóre materiały blisko zera absolutnego (-273°C), ich opór elektryczny spada dokładnie do ZERA. Prąd może w nich krążyć w nieskończoność bez strat." }
+            { t: "Prawo Moore'a", c: "Liczba tranzystorów w procesorach podwaja się średnio co 2 lata. Twój telefon ma ich miliardy!" },
+            { t: "Superprzewodnictwo", c: "Gdy schłodzisz niektóre materiały blisko zera absolutnego, ich opór spada do zera." }
         ];
 
+        // ROZBUDOWANA BAZA PYTAŃ DO NIESKOŃCZONEGO SCROLLA
         const lessons = [
-            { tag: "Fundamenty", t: "Napięcie vs Natężenie", c: "Wyobraź sobie wąż ogrodowy. Napięcie (Volty) to ciśnienie wody. Natężenie (Ampery) to grubość strumienia wody. Co się stanie z ilością płynącej wody (Amperami), jeśli zwiększysz ciśnienie (Volty), ale wąż pozostanie ten sam?", o: ["Zmniejszy się", "Zwiększy się", "Pozostanie bez zmian"], a: 1 },
-            { tag: "Prawo Ohma", t: "Wzór Inżyniera", c: "Najważniejszy wzór to U = I * R (Napięcie = Natężenie * Opór). Jeśli masz baterię 10V i rezystor stawiający opór 2 Ohmy, jaki prąd (I) popłynie?", o: ["20 Amperów", "5 Amperów", "12 Amperów"], a: 1 },
-            { tag: "Moc", t: "Waty (W)", c: "Moc to praca wykonana w czasie. Wzór to P = U * I. Ile mocy zużywa grzałka podłączona do sieci 230V, przez którą płynie prąd 10A?", o: ["2300 Watów", "23 Waty", "1000 Watów"], a: 0 }
+            { tag: "Fundamenty", t: "Napięcie vs Natężenie", c: "Jeśli wąż ogrodowy to przewód, to ciśnienie wody to Napięcie (V), a grubość strumienia to Natężenie (A). Co się stanie z prądem, jeśli zwiększysz ciśnienie?", o: ["Spadnie", "Wzrośnie", "Zniknie"], a: 1 },
+            { tag: "Prawo Ohma", t: "Kluczowy Wzór", c: "Wzór to U = I * R. Masz baterię 10V i opornik 2 Ohmy. Jaki prąd popłynie?", o: ["20 Amperów", "5 Amperów", "12 Amperów"], a: 1 },
+            { tag: "Moc", t: "Waty (W)", c: "Moc to P = U * I. Ile mocy zużywa grzałka 230V, przez którą płynie 10A?", o: ["2300 W", "23 W", "1000 W"], a: 0 },
+            { tag: "Komponenty", t: "Dioda", c: "Dioda to w świecie elektryki swoisty zawór jednokierunkowy. Co to oznacza?", o: ["Wzmacnia prąd", "Przepuszcza prąd tylko w jedną stronę", "Magazynuje energię"], a: 1 },
+            { tag: "Półprzewodniki", t: "Tranzystor", c: "Tranzystor to najważniejszy wynalazek XX wieku. Działa jako elektroniczny...", o: ["Przełącznik lub wzmacniacz", "Kabel", "Izolator"], a: 0 },
+            { tag: "Komponenty", t: "Kondensator", c: "Kondensator potrafi bardzo szybko gromadzić i oddawać ładunek elektryczny. Przypomina to działanie:", o: ["Bardzo szybkiej, małej baterii", "Rezystora", "Transformatora"], a: 0 },
+            { tag: "Zasilanie", t: "AC vs DC", c: "W gniazdku w ścianie masz prąd zmienny (AC), a w baterii telefonu masz prąd:", o: ["Również zmienny (AC)", "Stały (DC)", "Tylko Napięcie"], a: 1 }
         ];
 
-        // --- SYSTEM STATYSTYK ---
         let userStats = {
             streak: parseInt(localStorage.getItem('vm_streak') || '0'),
             level: parseInt(localStorage.getItem('vm_level') || '1'),
             xp: parseInt(localStorage.getItem('vm_xp') || '0'),
-            lastVisit: localStorage.getItem('vm_lastVisit') || '',
-            currentLesson: 0
+            lastVisit: localStorage.getItem('vm_lastVisit') || ''
         };
 
         const XP_PER_LEVEL = 100;
-        const XP_REWARD = 40;
+        const XP_REWARD = 25; // Zmniejszamy XP za jedno pytanie, bo teraz można ich robić dużo
 
         function initApp() {
             checkStreak();
             updateUI();
             loadTrivia();
-            renderLesson();
+            renderRandomLesson();
         }
 
         function checkStreak() {
@@ -112,14 +102,9 @@
             if (userStats.lastVisit !== today) {
                 let yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
-                
-                if (userStats.lastVisit === yesterday.toDateString()) {
-                    userStats.streak++;
-                } else if (userStats.lastVisit !== "") {
-                    userStats.streak = 1; // Utrata streaka
-                } else {
-                    userStats.streak = 1; // Pierwsze wejście
-                }
+                if (userStats.lastVisit === yesterday.toDateString()) userStats.streak++;
+                else if (userStats.lastVisit !== "") userStats.streak = 1;
+                else userStats.streak = 1;
                 userStats.lastVisit = today;
                 saveStats();
             }
@@ -130,8 +115,7 @@
             if (userStats.xp >= XP_PER_LEVEL) {
                 userStats.level++;
                 userStats.xp -= XP_PER_LEVEL;
-                // Opcjonalnie: dźwięk awansu lub konfetti!
-                alert(`🎉 Awansowałeś na poziom ${userStats.level}! Inżynier rośnie w siłę.`);
+                alert(`🎉 Awansowałeś na poziom ${userStats.level}!`);
             }
             saveStats();
             updateUI();
@@ -147,8 +131,7 @@
         function updateUI() {
             document.getElementById('streak-display').innerText = `🔥 ${userStats.streak}`;
             document.getElementById('level-display').innerText = `Lvl ${userStats.level}`;
-            const xpPercent = (userStats.xp / XP_PER_LEVEL) * 100;
-            document.getElementById('xp-bar').style.width = `${xpPercent}%`;
+            document.getElementById('xp-bar').style.width = `${(userStats.xp / XP_PER_LEVEL) * 100}%`;
         }
 
         function loadTrivia() {
@@ -158,17 +141,14 @@
             document.getElementById('trivia-content').innerText = todayTrivia.c;
         }
 
-        // --- SILNIK QUIZU ---
-        function renderLesson() {
-            if (userStats.currentLesson >= lessons.length) {
-                document.getElementById('lesson-card').innerHTML = `
-                    <h2 style="text-align:center;">Wszystko zaliczone! 🏆</h2>
-                    <p style="text-align:center;">Na dziś to wszystko. Wróć jutro po nową dawkę wiedzy lub zrób sobie przerwę – zasłużyłeś, mózg rośnie!</p>
-                `;
-                return;
-            }
+        // --- NIESKOŃCZONY TRYB LOSOWANIA ---
+        let currentLessonIndex = 0;
 
-            const lesson = lessons[userStats.currentLesson];
+        function renderRandomLesson() {
+            // Losowanie pytania
+            currentLessonIndex = Math.floor(Math.random() * lessons.length);
+            const lesson = lessons[currentLessonIndex];
+            
             let html = `
                 <span class="lesson-tag">${lesson.tag}</span>
                 <h2>${lesson.t}</h2>
@@ -178,27 +158,25 @@
                         <div class="quiz-option" onclick="checkAnswer(${index}, this, ${lesson.a})">${opt}</div>
                     `).join('')}
                 </div>
-                <button class="next-btn" id="next-btn" onclick="nextLesson()">Dalej +${XP_REWARD} XP</button>
+                <button class="next-btn" id="next-btn" onclick="nextLesson()">Kolejne Pytanie (+${XP_REWARD} XP)</button>
             `;
             document.getElementById('lesson-card').innerHTML = html;
         }
 
         function checkAnswer(selectedIndex, element, correctIndex) {
             const options = document.querySelectorAll('.quiz-option');
-            // Zablokuj kolejne kliknięcia
-            options.forEach(opt => opt.style.pointerEvents = 'none');
+            options.forEach(opt => opt.style.pointerEvents = 'none'); // Blokada kliknięć
 
             if (selectedIndex === correctIndex) {
                 element.classList.add('correct');
-                if (navigator.vibrate) navigator.vibrate(50); // Haptic feedback (Android)
+                if (navigator.vibrate) navigator.vibrate(50);
                 document.getElementById('next-btn').style.display = 'block';
             } else {
                 element.classList.add('wrong');
-                options[correctIndex].classList.add('correct'); // Pokaż dobrą odpowiedź
+                options[correctIndex].classList.add('correct');
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
                 document.getElementById('next-btn').innerText = "Zrozumiałem (Dalej)";
                 document.getElementById('next-btn').style.display = 'block';
-                // Za złą odpowiedź nie dajemy XP w tej sesji (zmienna flaga, dla prostoty tutaj pomińmy karę, ale można dodać)
                 element.dataset.wrong = "true"; 
             }
         }
@@ -208,15 +186,13 @@
             let gotItWrong = false;
             options.forEach(opt => { if(opt.dataset.wrong === "true") gotItWrong = true; });
 
-            if (!gotItWrong) {
-                addXP(XP_REWARD);
-            }
+            // XP dostajesz tylko za dobrą odpowiedź za pierwszym razem
+            if (!gotItWrong) addXP(XP_REWARD);
             
-            userStats.currentLesson++;
-            renderLesson();
+            // Renderujemy kolejne, losowe pytanie!
+            renderRandomLesson();
         }
 
-        // Uruchomienie
         initApp();
     </script>
 </body>

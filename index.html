@@ -14,37 +14,48 @@
     <title>VoltMaster - Ucz się, nie scrolluj</title>
     
     <style>
-        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #8b5cf6; --success: #22c55e; --error: #ef4444; --fire: #f97316; --xp: #3b82f6; }
+        :root { --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --accent: #8b5cf6; --success: #22c55e; --error: #ef4444; --fire: #f97316; --xp: #3b82f6; --sector: #10b981; }
         body { font-family: -apple-system, BlinkMacSystemFont, sans-serif; background: var(--bg); color: var(--text); margin: 0; display: flex; flex-direction: column; height: 100vh; overflow-x: hidden; padding-top: env(safe-area-inset-top); }
-        header { display: flex; justify-content: space-between; align-items: center; padding: 20px 25px 10px; }
-        .stats-container { display: flex; gap: 10px; }
-        .stat-badge { padding: 8px 14px; border-radius: 20px; font-size: 0.95rem; font-weight: 800; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
+        
+        header { display: flex; flex-direction: column; padding: 15px 20px 10px; gap: 10px; }
+        .top-row { display: flex; justify-content: space-between; align-items: center; }
+        .stats-container { display: flex; gap: 8px; flex-wrap: wrap; justify-content: flex-end;}
+        .stat-badge { padding: 6px 12px; border-radius: 20px; font-size: 0.9rem; font-weight: 800; display: flex; align-items: center; gap: 5px; box-shadow: 0 4px 10px rgba(0,0,0,0.2); }
         .streak-badge { background: rgba(249, 115, 22, 0.15); color: var(--fire); }
         .level-badge { background: rgba(59, 130, 246, 0.15); color: var(--xp); }
-        .xp-bar-container { margin: 0 25px 20px; height: 8px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
+        .sector-badge { background: rgba(16, 185, 129, 0.15); color: var(--sector); }
+        
+        .xp-bar-container { margin: 0 20px 15px; height: 6px; background: rgba(255,255,255,0.1); border-radius: 4px; overflow: hidden; }
         .xp-bar-fill { height: 100%; background: var(--xp); width: 0%; transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1); }
+        
         #app-container { flex: 1; display: flex; flex-direction: column; align-items: center; padding: 0 20px 20px; overflow-y: auto; }
-        .daily-card { background: linear-gradient(135deg, #8b5cf6, #3b82f6); border-radius: 24px; padding: 25px; box-shadow: 0 10px 30px rgba(139, 92, 246, 0.3); width: 100%; max-width: 400px; margin-bottom: 25px; }
-        .daily-badge { background: rgba(0,0,0,0.2); padding: 5px 12px; border-radius: 12px; font-size: 0.75rem; font-weight: 800; display: inline-block; margin-bottom: 15px; text-transform: uppercase; letter-spacing: 1px;}
-        .daily-title { font-size: 1.4rem; font-weight: 800; margin: 0 0 10px 0; }
-        .card { background: var(--card); border-radius: 24px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); width: 100%; max-width: 400px; }
+        .card { background: var(--card); border-radius: 24px; padding: 25px; box-shadow: 0 10px 25px rgba(0,0,0,0.4); width: 100%; max-width: 400px; margin-top: 10px;}
         .lesson-tag { color: var(--accent); font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 5px; display: block; }
         h2 { margin-top: 0; font-size: 1.3rem; margin-bottom: 15px; }
         p { line-height: 1.6; color: #cbd5e1; font-size: 1.05rem; }
+        
         .quiz-option { background: rgba(255,255,255,0.05); border: 2px solid rgba(255,255,255,0.1); border-radius: 16px; padding: 16px; margin: 12px 0; cursor: pointer; transition: all 0.3s; font-weight: 600; font-size: 1.05rem; }
         .quiz-option.correct { background: rgba(34, 197, 94, 0.2); border-color: var(--success); color: var(--success); }
         .quiz-option.wrong { background: rgba(239, 68, 68, 0.2); border-color: var(--error); color: var(--error); transform: translateX(5px); }
+        
         .next-btn { background: var(--accent); color: white; border: none; padding: 16px; border-radius: 16px; width: 100%; font-size: 1.1rem; font-weight: bold; margin-top: 15px; display: none; cursor: pointer; box-shadow: 0 5px 15px rgba(139, 92, 246, 0.4); }
         .next-btn:active { transform: scale(0.98); }
+        
+        /* Ekran Awansu Sektora */
+        #sector-unlock-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(15, 23, 42, 0.95); z-index: 100; flex-direction: column; justify-content: center; align-items: center; text-align: center; padding: 20px; box-sizing: border-box;}
+        .unlock-icon { font-size: 4rem; margin-bottom: 20px; }
     </style>
 </head>
 <body>
     <header>
-        <span style="font-weight: 900; font-size: 1.5rem; letter-spacing: -1px;">VoltMaster</span>
-        <div class="stats-container">
-            <div class="stat-badge streak-badge" id="streak-display">🔥 0</div>
-            <div class="stat-badge level-badge" id="level-display">Lvl 1</div>
+        <div class="top-row">
+            <span style="font-weight: 900; font-size: 1.5rem; letter-spacing: -1px;">VoltMaster</span>
+            <div class="stats-container">
+                <div class="stat-badge streak-badge" id="streak-display">🔥 0</div>
+                <div class="stat-badge level-badge" id="level-display">Lvl 1</div>
+            </div>
         </div>
+        <div class="stat-badge sector-badge" style="justify-content: center;" id="sector-display">Sektor 1: Początkujący</div>
     </header>
     
     <div class="xp-bar-container">
@@ -52,48 +63,142 @@
     </div>
     
     <div id="app-container">
-        <div class="daily-card">
-            <div class="daily-badge">💡 Wiedza zamiast scrollowania</div>
-            <h2 class="daily-title" id="trivia-title">Ładowanie...</h2>
-            <p id="trivia-content" style="color: rgba(255,255,255,0.9); margin: 0; font-size: 1rem;"></p>
-        </div>
-
         <div class="card" id="lesson-card">
             </div>
     </div>
 
-    <script>
-        const trivias = [
-            { t: "Prędkość prądu", c: "Elektrony poruszają się w kablu z prędkością zaledwie ~1 mm na sekundę! To pole elektromagnetyczne przenosi energię z prędkością światła." },
-            { t: "Prawo Moore'a", c: "Liczba tranzystorów w procesorach podwaja się średnio co 2 lata. Twój telefon ma ich miliardy!" },
-            { t: "Superprzewodnictwo", c: "Gdy schłodzisz niektóre materiały blisko zera absolutnego, ich opór spada do zera." }
-        ];
+    <div id="sector-unlock-modal">
+        <div class="unlock-icon">🔓⚡</div>
+        <h1 style="color: white;">Nowy Sektor Odblokowany!</h1>
+        <p id="unlock-desc" style="color: var(--sector); font-weight: bold; font-size: 1.2rem;"></p>
+        <p style="color: #cbd5e1; max-width: 300px;">Pytania z nowego sektora zostały właśnie dodane do Twojej talii. Poziom trudności rośnie.</p>
+        <button class="next-btn" style="display: block; max-width: 300px;" onclick="closeUnlockModal()">Lecimy dalej!</button>
+    </div>
 
-        // ROZBUDOWANA BAZA PYTAŃ DO NIESKOŃCZONEGO SCROLLA
+    <script>
+        // BAZA PYTAŃ - Podzielona na 5 sektorów (s: 1 to sektor 1, s: 5 to sektor 5)
         const lessons = [
-            { tag: "Fundamenty", t: "Napięcie vs Natężenie", c: "Jeśli wąż ogrodowy to przewód, to ciśnienie wody to Napięcie (V), a grubość strumienia to Natężenie (A). Co się stanie z prądem, jeśli zwiększysz ciśnienie?", o: ["Spadnie", "Wzrośnie", "Zniknie"], a: 1 },
-            { tag: "Prawo Ohma", t: "Kluczowy Wzór", c: "Wzór to U = I * R. Masz baterię 10V i opornik 2 Ohmy. Jaki prąd popłynie?", o: ["20 Amperów", "5 Amperów", "12 Amperów"], a: 1 },
-            { tag: "Moc", t: "Waty (W)", c: "Moc to P = U * I. Ile mocy zużywa grzałka 230V, przez którą płynie 10A?", o: ["2300 W", "23 W", "1000 W"], a: 0 },
-            { tag: "Komponenty", t: "Dioda", c: "Dioda to w świecie elektryki swoisty zawór jednokierunkowy. Co to oznacza?", o: ["Wzmacnia prąd", "Przepuszcza prąd tylko w jedną stronę", "Magazynuje energię"], a: 1 },
-            { tag: "Półprzewodniki", t: "Tranzystor", c: "Tranzystor to najważniejszy wynalazek XX wieku. Działa jako elektroniczny...", o: ["Przełącznik lub wzmacniacz", "Kabel", "Izolator"], a: 0 },
-            { tag: "Komponenty", t: "Kondensator", c: "Kondensator potrafi bardzo szybko gromadzić i oddawać ładunek elektryczny. Przypomina to działanie:", o: ["Bardzo szybkiej, małej baterii", "Rezystora", "Transformatora"], a: 0 },
-            { tag: "Zasilanie", t: "AC vs DC", c: "W gniazdku w ścianie masz prąd zmienny (AC), a w baterii telefonu masz prąd:", o: ["Również zmienny (AC)", "Stały (DC)", "Tylko Napięcie"], a: 1 }
+            // --- SEKTOR 1: FUNDAMENTY (Lvl 1+) ---
+            { s: 1, tag: "Podstawy", t: "Napięcie vs Natężenie", c: "Napięcie (V) to ciśnienie, Natężenie (A) to strumień. Co się stanie z prądem, jeśli zwiększysz ciśnienie?", o: ["Spadnie", "Wzrośnie", "Zniknie"], a: 1 },
+            { s: 1, tag: "Prawo Ohma", t: "Wzór U=I*R", c: "Bateria 10V, opornik 2 Ohmy. Jaki prąd popłynie?", o: ["20 A", "5 A", "12 A"], a: 1 },
+            { s: 1, tag: "Moc", t: "Waty (W)", c: "Moc to P = U * I. Grzałka 230V, prąd 10A. Jaka moc?", o: ["2300 W", "23 W", "1000 W"], a: 0 },
+            { s: 1, tag: "Zasilanie", t: "AC vs DC", c: "Prąd w baterii to prąd stały (DC). A w gniazdku ściennym?", o: ["Też stały", "Zmienny (AC)", "Impulsowy"], a: 1 },
+            { s: 1, tag: "Obwody", t: "Zwarcia", c: "Zwarcie następuje, gdy prąd omija obciążenie (np. żarówkę). Co się wtedy dzieje z oporem obwodu?", o: ["Spada prawie do zera", "Rośnie nieskończenie", "Nie zmienia się"], a: 0 },
+            { s: 1, tag: "Teoria", t: "Kierunek prądu", c: "Elektrony płyną od minusa do plusa. Jaki jest umowny kierunek prądu w inżynierii?", o: ["Od plusa do minusa", "Od minusa do plusa", "Zmienia się"], a: 0 },
+            { s: 1, tag: "Materiały", t: "Przewodniki", c: "Który materiał z poniższych NIE jest przewodnikiem prądu?", o: ["Miedź", "Woda destylowana", "Słona woda"], a: 1 },
+            { s: 1, tag: "Obwody", t: "Połączenie szeregowe", c: "Łącząc dwie baterie 1.5V szeregowo (jedna za drugą), uzyskasz napięcie:", o: ["1.5V", "3.0V", "0V"], a: 1 },
+            { s: 1, tag: "Moc", t: "Rachunki", c: "Płacisz za prąd w kWh. Czego to jednostka?", o: ["Mocy", "Energii", "Natężenia"], a: 1 },
+            { s: 1, tag: "Materiały", t: "Izolatory", c: "Guma i plastik to świetne izolatory. Oznacza to, że ich opór (R) jest:", o: ["Bardzo mały", "Bliski zera", "Bardzo duży"], a: 2 },
+
+            // --- SEKTOR 2: KOMPONENTY (Lvl 5+) ---
+            { s: 2, tag: "Elementy", t: "Dioda", c: "Dioda przypomina elektryczny zawór. Co robi?", o: ["Wzmacnia prąd", "Puszcza prąd w jedną stronę", "Magazynuje prąd"], a: 1 },
+            { s: 2, tag: "Elementy", t: "Kondensator", c: "Gromadzi i oddaje ładunek błyskawicznie. Mierzymy go w:", o: ["Faradach (F)", "Henrach (H)", "Ohmach (Ω)"], a: 0 },
+            { s: 2, tag: "Półprzewodniki", t: "Tranzystor", c: "Może działać jako wzmacniacz sygnału lub jako...", o: ["Elektroniczny przełącznik", "Izolator", "Bateria"], a: 0 },
+            { s: 2, tag: "Optoelektronika", t: "Dioda LED", c: "LED wymaga rezystora w szeregu. Dlaczego?", o: ["By świeciła na inny kolor", "By ograniczyć prąd, by się nie spaliła", "Dla ozdoby"], a: 1 },
+            { s: 2, tag: "Pasywne", t: "Cewka (Induktor)", c: "Cewka gromadzi energię w postaci:", o: ["Pola elektrycznego", "Pola magnetycznego", "Ciepła"], a: 1 },
+            { s: 2, tag: "Podzespoły", t: "Przekaźnik", c: "To mechaniczny przełącznik sterowany elektromagnesem. Pozwala:", o: ["Małym prądem sterować ogromnym prądem", "Zmieniać AC na DC", "Generować prąd"], a: 0 },
+            { s: 2, tag: "Oznaczenia", t: "Paski Rezystora", c: "Kolorowe paski na oporniku służą do:", o: ["Oznaczenia producenta", "Odczytania wartości oporu", "Odczytania napięcia maksymalnego"], a: 1 },
+            { s: 2, tag: "Komponenty", t: "Potencjometr", c: "To element używany np. w gałce głośności. Czym jest?", o: ["Tranzystorem", "Rezystorem o zmiennym oporze", "Kondensatorem"], a: 1 },
+            { s: 2, tag: "Ochrona", t: "Bezpiecznik topikowy", c: "Jak działa klasyczny bezpiecznik?", o: ["Wykrywa zmianę napięcia", "Cienki drut topi się, gdy prąd jest za duży, przerywając obwód", "Odbija fale radiowe"], a: 1 },
+            { s: 2, tag: "Mostki", t: "Mostek Graetza", c: "Układ czterech diod, który służy do:", o: ["Zmiany prądu DC na AC", "Zmiany prądu AC na DC (prostowanie)", "Wzmocnienia sygnału"], a: 1 },
+
+            // --- SEKTOR 3: MIERNICTWO I ZABEZPIECZENIA (Lvl 10+) ---
+            { s: 3, tag: "Pomiary", t: "Woltomierz", c: "Jak podłączasz miernik, by zmierzyć napięcie na żarówce?", o: ["Szeregowo", "Równolegle", "Do uziemienia"], a: 1 },
+            { s: 3, tag: "Pomiary", t: "Amperomierz", c: "Mierzenie prądu (A) wymaga podłączenia miernika:", o: ["Szeregowo (przecinając kabel)", "Równolegle", "Tylko do bieguna plusowego"], a: 0 },
+            { s: 3, tag: "Instalacje", t: "Kolor kabla L", c: "Kabel fazowy (L) pod napięciem w UE ma zazwyczaj kolor:", o: ["Niebieski", "Żółto-zielony", "Brązowy lub czarny"], a: 2 },
+            { s: 3, tag: "Instalacje", t: "Kabel PE", c: "Żółto-zielony kabel to uziemienie (PE). Jego celem jest:", o: ["Odprowadzenie prądu na obudowę", "Zabezpieczenie przed porażeniem (zwarcie do ziemi)", "Zasilanie lamp"], a: 1 },
+            { s: 3, tag: "Zabezpieczenia", t: "Wyłącznik RCD", c: "Różnicówka w domu zadziała, gdy:", o: ["Prąd z gniazdka ucieknie inną drogą (np. przez ciało do ziemi)", "Zrobisz zwarcie", "Podłączysz za dużo urządzeń"], a: 0 },
+            { s: 3, tag: "Miernictwo", t: "Test ciągłości", c: "Opcja z 'piszczkiem' na multimetrze sprawdza czy:", o: ["W kablu jest napięcie", "Kabel nie jest przerwany (opór ~0)", "Prąd płynie szybko"], a: 1 },
+            { s: 3, tag: "Bezpieczeństwo", t: "Porażenie", c: "Co tak naprawdę zabija podczas porażenia?", o: ["Tylko bardzo wysokie napięcie (V)", "Przepływający prąd (A) np. rzędu 50mA przez serce", "Częstotliwość"], a: 1 },
+            { s: 3, tag: "Instalacje", t: "Przekrój kabla", c: "Im grubszy przewód miedziany, tym jego opór (R):", o: ["Rośnie", "Maleje", "Nie zmienia się"], a: 1 },
+            { s: 3, tag: "Instrukcje", t: "Zasada jednej ręki", c: "Przy pracy z wysokim napięciem jedną rękę trzyma się w kieszeni, aby:", o: ["Prąd nie przepłynął z ręki do ręki, przez serce", "Mniej się pocić", "Łatwiej łapać upadające narzędzia"], a: 0 },
+            { s: 3, tag: "Zabezpieczenia", t: "Bezpiecznik B16", c: "Popularny w domu bezpiecznik nadprądowy B16 rozłączy obwód, gdy pobór przekroczy około:", o: ["16 Amperów", "16 Watów", "16 Voltów"], a: 0 },
+
+            // --- SEKTOR 4: INŻYNIER (Lvl 15+) ---
+            { s: 4, tag: "Fizyka", t: "Transformator", c: "Urządzenie to pozwala zmieniać napięcie. Działa WYŁĄCZNIE dla:", o: ["Prądu DC", "Prądu AC", "Baterii litowych"], a: 1 },
+            { s: 4, tag: "AC", t: "Częstotliwość sieci", c: "W europejskich gniazdkach prąd zmienia kierunek z częstotliwością:", o: ["60 Hz", "50 Hz", "100 Hz"], a: 1 },
+            { s: 4, tag: "Teoria", t: "Moc bierna", c: "W sieciach AC występuje moc czynna i bierna. Moc bierna to:", o: ["Moc która wykonuje pracę (np. świeci)", "Energia pulsująca między źródłem a odbiornikiem (np. cewką), która nie wykonuje użytecznej pracy", "Moc w bateriach"], a: 1 },
+            { s: 4, tag: "Teoria", t: "Napięcie skuteczne RMS", c: "Mówimy, że w gniazdku jest 230V. To napięcie RMS (skuteczne). Napięcie szczytowe w fali wynosi:", o: ["Dokładnie 230V", "Około 325V", "115V"], a: 1 },
+            { s: 4, tag: "Silniki", t: "Silnik indukcyjny", c: "Klatkowy silnik trójfazowy jest najpopularniejszy w przemyśle, ponieważ:", o: ["Nie posiada szczotek i jest niemal bezawaryjny", "Zasilany jest z USB", "Ma największą prędkość"], a: 0 },
+            { s: 4, tag: "Trójfaza", t: "Przesunięcie fazowe", c: "W prądzie trójfazowym, fale napięcia są przesunięte względem siebie o:", o: ["90 stopni", "120 stopni", "180 stopni"], a: 1 },
+            { s: 4, tag: "Elementy", t: "Triak", c: "Zamiast przekaźnika do sterowania prądem AC (np. ściemniacz światła) inżynier użyje:", o: ["Tranzystora NPN", "Triaka", "Kondensatora elektrolitycznego"], a: 1 },
+            { s: 4, tag: "Pojemność", t: "Szeregowe kondensatory", c: "Jeśli połączysz kondensatory szeregowo, ich całkowita pojemność:", o: ["Zwiększa się", "Zmniejsza się", "Jest sumowana"], a: 1 },
+            { s: 4, tag: "Cewki", t: "Szeregowe cewki", c: "Jeśli połączysz cewki szeregowo, ich indukcyjność całkowita:", o: ["Maleje", "Rośnie (sumuje się)", "Znika"], a: 1 },
+            { s: 4, tag: "Przesył", t: "Wysokie napięcie", c: "Dlaczego prąd między miastami przesyła się na bardzo wysokim napięciu (np. 110kV)?", o: ["Bo elektrony szybciej lecą", "By zmniejszyć natężenie prądu (I) i zredukować straty cieplne na kablach (I^2*R)", "Bo kable są grubsze"], a: 1 },
+
+            // --- SEKTOR 5: MASTER - CYFRÓWKA I MIKROKONTROLERY (Lvl 20+) ---
+            { s: 5, tag: "Cyfrowe", t: "System Binarany", c: "Elektronika cyfrowa operuje na zerach i jedynkach. W napięciach zazwyczaj 1 logiczna to:", o: ["Napięcie bliskie zeru", "Napięcie zasilania (np. 3.3V lub 5V)", "Prąd zmienny"], a: 1 },
+            { s: 5, tag: "Bramki", t: "Bramka AND", c: "Bramka AND na wyjściu daje sygnał '1' tylko wtedy, gdy:", o: ["Oba wejścia mają stan '1'", "Przynajmniej jedno wejście ma '1'", "Oba wejścia mają '0'"], a: 0 },
+            { s: 5, tag: "Sygnały", t: "Modulacja PWM", c: "Mikrokontroler steruje jasnością LED używając PWM. Co to jest?", o: ["Zmiana napięcia analogowego z 5V na 3V", "Bardzo szybkie włączanie i wyłączanie zasilania ze zmiennym współczynnikiem wypełnienia", "Zmiana koloru światła"], a: 1 },
+            { s: 5, tag: "Interfejsy", t: "ADC", c: "Konwerter ADC w mikrokontrolerze służy do:", o: ["Tłumaczenia napięcia analogowego (np. z czujnika) na liczbę cyfrową", "Wysyłania danych przez internet", "Generowania dźwięku"], a: 0 },
+            { s: 5, tag: "Komunikacja", t: "Magistrala I2C", c: "Do podłączenia wyświetlacza do Arduino użyto I2C. Wymaga to zazwyczaj linii danych (SDA) i linii...", o: ["Zegarowej (SCL)", "Zasilającej dużej mocy", "Analogowej"], a: 0 },
+            { s: 5, tag: "Architektura", t: "Pull-up", c: "Rezystor podciągający (pull-up) przycisku zapewnia, że pin mikrokontrolera:", o: ["Nie ma 'latającego' stanu (pływającego) gdy przycisk nie jest wciśnięty", "Pobiera więcej prądu", "Zabezpiecza przed piorunami"], a: 0 },
+            { s: 5, tag: "Budowa", t: "Częstotliwość kwarcu", c: "Rezonator kwarcowy 16MHz przy mikrokontrolerze służy jako:", o: ["Bateria zapasowa", "Serce układu - nadaje takt procesorowi (zegar)", "Antena WiFi"], a: 1 },
+            { s: 5, tag: "Bramki", t: "Bramka XOR", c: "Exclusive OR (XOR) daje jedynkę, gdy:", o: ["Tylko jedno z wejść jest równe 1 (stany są różne)", "Oba są równe 1", "Żadne wejście nie jest podłączone"], a: 0 },
+            { s: 5, tag: "Mikrokontrolery", t: "Przerwania (Interrupts)", c: "Hardware'owe przerwanie w kodzie sprawia, że:", o: ["Układ natychmiastowo rzuca to co robi i wykonuje szybką funkcję w odpowiedzi na pin", "Program się zawiesza i resetuje", "Pobór mocy spada do zera"], a: 0 },
+            { s: 5, tag: "Zasilanie", t: "Stabilizator LDO", c: "Zasilając Arduino z 9V, na pokładzie jest stabilizator robiący 5V. Różnica (4V) uchodzi jako:", o: ["Fale radiowe", "Ciepło (LDO to liniowy stabilizator)", "Dodatkowa energia do baterii"], a: 1 }
         ];
 
         let userStats = {
             streak: parseInt(localStorage.getItem('vm_streak') || '0'),
             level: parseInt(localStorage.getItem('vm_level') || '1'),
             xp: parseInt(localStorage.getItem('vm_xp') || '0'),
-            lastVisit: localStorage.getItem('vm_lastVisit') || ''
+            lastVisit: localStorage.getItem('vm_lastVisit') || '',
+            unlockedSector: 1
         };
 
         const XP_PER_LEVEL = 100;
-        const XP_REWARD = 25; // Zmniejszamy XP za jedno pytanie, bo teraz można ich robić dużo
+        const XP_REWARD = 25; 
+
+        let questionDeck = [];
+
+        // --- SILNIK SEKTORÓW ---
+        const sectorNames = {
+            1: "Sektor 1: Początkujący",
+            2: "Sektor 2: Amator",
+            3: "Sektor 3: Praktyk",
+            4: "Sektor 4: Inżynier",
+            5: "Sektor 5: Master"
+        };
+
+        function calculateSector() {
+            let newSector = 1;
+            if (userStats.level >= 20) newSector = 5;
+            else if (userStats.level >= 15) newSector = 4;
+            else if (userStats.level >= 10) newSector = 3;
+            else if (userStats.level >= 5) newSector = 2;
+
+            if (newSector > userStats.unlockedSector) {
+                userStats.unlockedSector = newSector;
+                showUnlockModal(newSector);
+                questionDeck = []; // Wymusza przetasowanie talii, by wtasować nowe pytania
+            }
+        }
+
+        function getNextQuestionIndex() {
+            if (questionDeck.length === 0) {
+                // Filtrujemy lekcje tylko do odblokowanych sektorów
+                let availableLessons = [];
+                for (let i = 0; i < lessons.length; i++) {
+                    if (lessons[i].s <= userStats.unlockedSector) {
+                        availableLessons.push(i);
+                    }
+                }
+                
+                // Tasowanie
+                questionDeck = [...availableLessons];
+                for (let i = questionDeck.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [questionDeck[i], questionDeck[j]] = [questionDeck[j], questionDeck[i]];
+                }
+            }
+            return questionDeck.pop();
+        }
 
         function initApp() {
+            calculateSector(); // Oblicz sektor na starcie w razie zmiany levelu poza apką
             checkStreak();
             updateUI();
-            loadTrivia();
             renderRandomLesson();
         }
 
@@ -115,7 +220,7 @@
             if (userStats.xp >= XP_PER_LEVEL) {
                 userStats.level++;
                 userStats.xp -= XP_PER_LEVEL;
-                alert(`🎉 Awansowałeś na poziom ${userStats.level}!`);
+                calculateSector(); // Sprawdź, czy nowy lvl odblokował sektor
             }
             saveStats();
             updateUI();
@@ -131,26 +236,25 @@
         function updateUI() {
             document.getElementById('streak-display').innerText = `🔥 ${userStats.streak}`;
             document.getElementById('level-display').innerText = `Lvl ${userStats.level}`;
+            document.getElementById('sector-display').innerText = sectorNames[userStats.unlockedSector];
             document.getElementById('xp-bar').style.width = `${(userStats.xp / XP_PER_LEVEL) * 100}%`;
         }
 
-        function loadTrivia() {
-            const dayOfYear = Math.floor((new Date() - new Date(new Date().getFullYear(), 0, 0)) / 1000 / 60 / 60 / 24);
-            const todayTrivia = trivias[dayOfYear % trivias.length];
-            document.getElementById('trivia-title').innerText = todayTrivia.t;
-            document.getElementById('trivia-content').innerText = todayTrivia.c;
+        function showUnlockModal(sectorId) {
+            document.getElementById('unlock-desc').innerText = sectorNames[sectorId];
+            document.getElementById('sector-unlock-modal').style.display = 'flex';
         }
 
-        // --- NIESKOŃCZONY TRYB LOSOWANIA ---
-        let currentLessonIndex = 0;
+        function closeUnlockModal() {
+            document.getElementById('sector-unlock-modal').style.display = 'none';
+        }
 
         function renderRandomLesson() {
-            // Losowanie pytania
-            currentLessonIndex = Math.floor(Math.random() * lessons.length);
+            let currentLessonIndex = getNextQuestionIndex();
             const lesson = lessons[currentLessonIndex];
             
             let html = `
-                <span class="lesson-tag">${lesson.tag}</span>
+                <span class="lesson-tag">Sektor ${lesson.s} • ${lesson.tag}</span>
                 <h2>${lesson.t}</h2>
                 <p>${lesson.c}</p>
                 <div id="options-container">
@@ -158,14 +262,14 @@
                         <div class="quiz-option" onclick="checkAnswer(${index}, this, ${lesson.a})">${opt}</div>
                     `).join('')}
                 </div>
-                <button class="next-btn" id="next-btn" onclick="nextLesson()">Kolejne Pytanie (+${XP_REWARD} XP)</button>
+                <button class="next-btn" id="next-btn" onclick="nextLesson()">Następne Wyzwanie (+${XP_REWARD} XP)</button>
             `;
             document.getElementById('lesson-card').innerHTML = html;
         }
 
         function checkAnswer(selectedIndex, element, correctIndex) {
             const options = document.querySelectorAll('.quiz-option');
-            options.forEach(opt => opt.style.pointerEvents = 'none'); // Blokada kliknięć
+            options.forEach(opt => opt.style.pointerEvents = 'none'); 
 
             if (selectedIndex === correctIndex) {
                 element.classList.add('correct');
@@ -175,7 +279,7 @@
                 element.classList.add('wrong');
                 options[correctIndex].classList.add('correct');
                 if (navigator.vibrate) navigator.vibrate([100, 50, 100]);
-                document.getElementById('next-btn').innerText = "Zrozumiałem (Dalej)";
+                document.getElementById('next-btn').innerText = "Zapamiętam (Dalej)";
                 document.getElementById('next-btn').style.display = 'block';
                 element.dataset.wrong = "true"; 
             }
@@ -186,10 +290,7 @@
             let gotItWrong = false;
             options.forEach(opt => { if(opt.dataset.wrong === "true") gotItWrong = true; });
 
-            // XP dostajesz tylko za dobrą odpowiedź za pierwszym razem
             if (!gotItWrong) addXP(XP_REWARD);
-            
-            // Renderujemy kolejne, losowe pytanie!
             renderRandomLesson();
         }
 
